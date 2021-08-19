@@ -1,0 +1,46 @@
+name: C/C++ CI2
+
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [build-LLVM-14]
+  
+jobs:
+  build-LLVM-14:
+    name: C/C++ CI3
+    runs-on: windows-latest
+    steps:
+      - name: Get LLVM
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+          
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: Bonarogit/a
+          event-type: build-LLVM-14
+          client-payload: '{"submodule": "${{ github.repository }}"}'
+ 
+      - name: Rebuild and Install LLVM
+        shell: cmd
+        run: |
+          call "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+          dir
+          mkdir llvm-project/llvm/build3
+          cd llvm-project/llvm/build3
+          cmake D:/a/a/llvm-project/llvm -GNinja ^
+            -DLLVM_ENABLE_PROJECTS=clang;clang-tools-extra;compiler-rt;lld;openmp;polly ^
+            -DLLVM_BUILD_EXAMPLES=OFF ^
+            -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_WERROR=OFF ^
+            -DLLVM_ENABLE_ASSERTIONS=ON -DLLVM_TARGETS_TO_BUILD=X86 ^
+            -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl ^
+            -DCMAKE_INSTALL_PREFIX="D:/a/a/llvm-project/llvm/install3"
+          cmake --build . --target install --config Release
+          
+      - uses: actions/upload-artifact@v2
+        with: 
+          name: llvm-14-msvc
+          path: D:/a/a/llvm-project/llvm/install3

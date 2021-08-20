@@ -3,7 +3,9 @@ name: C/C++ CI2
 
 on:
   workflow_dispatch:
-  
+  schedule:
+       - cron: 0 05 * * *
+       
 jobs:
   build-LLVM-14:
     name: C/C++ CI3
